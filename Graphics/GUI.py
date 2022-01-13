@@ -146,6 +146,10 @@ class Events():
 
         arduino = serial.Serial(port=str(input), baudrate=115200, timeout=0.1)
 
+    def reset(self, input):
+
+        self.process.reset()
+
 class Window():
 
     def __init__(self):

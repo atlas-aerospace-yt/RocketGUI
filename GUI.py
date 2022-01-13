@@ -17,14 +17,13 @@ import time
 plt.style.use("seaborn-dark")
 
 for param in ['figure.facecolor', 'axes.facecolor', 'savefig.facecolor']:
-    plt.rcParams[param] = '#141417'  # bluish dark grey
+    plt.rcParams[param] = '#141417'
 
-for param in ['text.color', 'axes.labelcolor', 'xtick.color', 'ytick.color']:
-    plt.rcParams[param] = '#00f0c3'  # very light grey
+for param in ['text.color', 'axes.labelcolor', 'xtick.color', 'ytick.color','grid.color']:
+    plt.rcParams[param] = '#00f0c3'
 
-plt.rcParams['grid.color'] = '#00f0c3'
 
-COM = "COM8"
+COM = "/dev/ttyACM0"
 data = mesh.Mesh.from_file('RocketFast.stl')
 
 try:
@@ -188,9 +187,9 @@ class Processing():
                 data = mesh.Mesh.from_file('RocketFast.stl')
 
                 self.ax0.clear()
-                data.rotate([1,0,0],np.radians(self.vehicle[0]))
-                data.rotate([0,1,0],np.radians(self.vehicle[1]))
-                data.rotate([0,0,1],np.radians(self.vehicle[2]))
+                data.rotate([1,0,0],np.radians(self.vehicle[1]))
+                data.rotate([0,1,0],np.radians(self.vehicle[0])*-1)
+                data.rotate([0,0,1],np.radians(self.vehicle[2])*-1)
 
                 collection = mplot3d.art3d.Poly3DCollection(data.vectors)
                 collection.set_facecolor('#254A99')
@@ -207,8 +206,8 @@ class Processing():
                     for y in range(0, len(self.Graph)):
 
                         self.ax1.plot(self.X, self.Graph[y])
-                        self.ax1.set_xlabel("time")
-                        self.ax1.grid(color='#676767')
+                self.ax1.set_xlabel("time")
+                self.ax1.grid(color='#00f0c3')
 
                 if self.numOfGraphs >= 2:
                     self.ax2.clear()
@@ -216,8 +215,8 @@ class Processing():
                     for y in range(0, len(self.Graph)):
 
                         self.ax2.plot(self.X, self.Graph[y])
-                        self.ax2.set_xlabel("time")
-                        self.ax2.grid(color='#676767')
+                self.ax2.set_xlabel("time")
+                self.ax2.grid(color='#00f0c3')
 
                 if self.numOfGraphs >= 3:
                     self.ax3.clear()
@@ -225,8 +224,8 @@ class Processing():
                     for y in range(0, len(self.Graph)):
 
                         self.ax3.plot(self.X, self.Graph[y])
-                        self.ax3.set_xlabel("time")
-                        self.ax3.grid(color='#676767')
+                        self.ax3.set_xlabel("#00f0c3")
+
 
     def getRawData(self):
 
@@ -240,6 +239,14 @@ class Processing():
 
         except:
             return None
+
+    def reset(self):
+
+        self.X = []
+
+        self.Graph1 = []
+        self.Graph2 = []
+        self.Graph3 = []
 
     def sendData(self,input):
 
@@ -278,6 +285,9 @@ class Events():
 
         self.window.reStart()
 
+    def reset(self, input):
+
+        self.process.reset()
 
 class Window():
 
@@ -311,9 +321,12 @@ class Window():
         display.on_clicked(event.minThreeDimension)
 
         location = plt.axes([0.025, 0.925, 0.05, 0.0375])
-        graphs = Button(location, "+")
-        graphs.label.set_fontsize(20)
-        graphs.label.set_color('black')
+
+        self.text = tkinter.StringVar()
+
+        self.graphs = Button(location, self.text)
+        self.graphs.label.set_fontsize(20)
+        self.graphs.label.set_color('black')
 
         fancybox = mpatches.FancyBboxPatch((0,0), 1,1,
                                    edgecolor='#1F773D',
@@ -322,7 +335,7 @@ class Window():
                                    mutation_aspect=3,
                                    transform=location.transAxes, clip_on=False)
         location.add_patch(fancybox)
-        graphs.on_clicked(event.minAllGraphs)
+        self.graphs.on_clicked(event.minAllGraphs)
 
         location = plt.axes([0.75, 0.035, 0.15, 0.03])
         terminal = Button(location, "Terminal")
@@ -353,9 +366,9 @@ class Window():
 
 
         location.add_patch(fancybox)
-        reset.on_clicked(event.minThreeDimension)
+        reset.on_clicked(event.reset)
 
-
+        self.minGraph = False
         anim = animation.FuncAnimation(process.fig, process.animate)
 
         self.root.mainloop()
@@ -399,8 +412,23 @@ class Window():
         self.terminal.after(1,self.task)
         self.terminal.mainloop()
 
+    def changeDisplayButton(self):
+
+        if self.minGraph == True:
+
+            self.minGraph = False
+            self.text.set("1adhdfhsd")
+        else:
+            self.minGraph = True
+            self.text.set("jkjjkjhjk")
+
+    def changeGraphButton(self):
+
+        self.miniagram = True
+
     def reStart(self):
 
+        self.changeDisplayButton()
         self.root.destroy()
         self.__init__()
 
